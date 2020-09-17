@@ -30,7 +30,9 @@
     </node>
 
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+      <!-- Set planner -->
       <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+
       <!-- Default configs form the TB3 repos -->
       <rosparam file="$(find multi_turtlebot3_environment)/param/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
       <rosparam file="$(find multi_turtlebot3_environment)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
