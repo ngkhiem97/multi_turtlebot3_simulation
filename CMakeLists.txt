@@ -8,6 +8,8 @@ project(multi_turtlebot3_environment)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  actionlib
+  move_base_msgs
   roscpp
   rospy
   std_msgs
@@ -134,6 +136,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/multi_turtlebot3_environment_node.cpp)
+add_executable(simple_navigation_goal src/simple_navigation_goal.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -149,6 +152,7 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(simple_navigation_goal ${catkin_LIBRARIES})
 
 #############
 ## Install ##
