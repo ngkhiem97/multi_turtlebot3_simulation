@@ -1,21 +1,26 @@
 <launch>
+  <!-- Model of Turtlebot -->
   <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
   
+  <!-- Turtlebot 1 -->
   <arg name="tb1" default="turtlebot01"/>
   <arg name="x_pos_01" default="-2.0"/>
   <arg name="y_pos_01" default="-0.5"/>
   <arg name="z_pos_01" default="0.0"/>
 
+  <!-- Turtlebot 2 -->
   <arg name="tb2" default="turtlebot02"/>
   <arg name="x_pos_02" default="-2.0"/>
   <arg name="y_pos_02" default="0.5"/>
   <arg name="z_pos_02" default="0.0"/>
   
+  <!-- Turtlebot 3 -->
   <arg name="tb3" default="turtlebot03"/>
   <arg name="x_pos_03" default="2.0"/>
   <arg name="y_pos_03" default="-0.5"/>
   <arg name="z_pos_03" default="0.0"/>
 
+  <!-- Launch Gazebo world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world"/>
     <arg name="paused" value="false"/>
@@ -27,6 +32,7 @@
 
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
 
+  <!--Spawn robot 1 on Gazebo -->
   <group ns = "$(arg tb1)">
     <param name="tf_prefix" value="$(arg tb1)" />
     
@@ -37,6 +43,7 @@
     </node>
   </group>
 
+  <!--Spawn robot 2 on Gazebo -->
   <group ns = "$(arg tb2)">
     <param name="tf_prefix" value="$(arg tb2)" />
     
@@ -47,6 +54,7 @@
     </node>
   </group>
 
+  <!--Spawn robot 3 on Gazebo -->
   <group ns = "$(arg tb3)">
     <param name="tf_prefix" value="$(arg tb3)" />
     
