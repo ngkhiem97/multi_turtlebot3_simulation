@@ -10,6 +10,8 @@ project(multi_turtlebot3_environment)
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   move_base_msgs
+  geometry_msgs
+  tf
   roscpp
   rospy
   std_msgs
@@ -137,6 +139,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/multi_turtlebot3_environment_node.cpp)
 add_executable(simple_navigation_goal src/simple_navigation_goal.cpp)
+add_executable(intermediate_navigator src/intermediate_navigator.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -153,6 +156,7 @@ add_executable(simple_navigation_goal src/simple_navigation_goal.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(simple_navigation_goal ${catkin_LIBRARIES})
+target_link_libraries(intermediate_navigator ${catkin_LIBRARIES})
 
 #############
 ## Install ##
