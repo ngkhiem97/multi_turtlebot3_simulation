@@ -2,6 +2,13 @@
 
 Environment for Multi Turtlebot3 System
 
+## Clone Repository to catkin workspace
+```bash
+cd ~/catkin_ws/src 
+git clone https://github.com/ngkhiem97/multi_turtlebot3_environment.git
+catkin_make
+```
+
 ## Launching Gazebo environment with 3 robot on World View
 
 ```bash
