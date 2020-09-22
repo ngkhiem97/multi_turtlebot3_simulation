@@ -6,6 +6,7 @@ Environment for Multi Turtlebot3 System
 ```bash
 cd ~/catkin_ws/src 
 git clone https://github.com/ngkhiem97/multi_turtlebot3_environment.git
+cd ~/catkin_ws
 catkin_make
 ```
 
