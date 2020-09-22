@@ -54,7 +54,7 @@
       
       <!-- Centralized map server -->
       <remap from="map" to="/map"/>
-      <remap from="move_base_simple/goal" to="/move_base_simple/goal"/>
+      <!-- <remap from="move_base_simple/goal" to="/move_base_simple/goal"/> -->
     </node>
 
   </group>
@@ -73,6 +73,34 @@
       <remap from="static_map" to="/static_map"/>
     </node>
 
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+      <!-- Set planner -->
+      <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+
+      <!-- Default configs form the TB3 repos -->
+      <rosparam file="$(find multi_turtlebot3_environment)/param/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/move_base_params.yaml" command="load" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
+
+      <!-- Set tf_prefix for frames explicity, overwriting defaults -->
+      <!---->
+      <param name="global_costmap/scan/sensor_frame"                value="$(arg robot_namespace_02)/base_scan"/>
+      <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_namespace_02)/base_scan"/>
+      <param name="global_costmap/global_frame"                     value="map"/>
+      <param name="global_costmap/robot_base_frame"                 value="$(arg robot_namespace_02)/base_footprint"/>
+      <param name="local_costmap/scan/sensor_frame"                 value="$(arg robot_namespace_02)/base_scan"/>
+      <param name="local_costmap/obstacle_layer/scan/sensor_frame"  value="$(arg robot_namespace_02)/base_scan"/>
+      <param name="local_costmap/global_frame"                      value="$(arg robot_namespace_02)/odom"/>
+      <param name="local_costmap/robot_base_frame"                  value="$(arg robot_namespace_02)/base_footprint"/>
+      
+      <!-- Centralized map server -->
+      <remap from="map" to="/map"/>
+      <!-- <remap from="move_base_simple/goal" to="/move_base_simple/goal"/> -->
+    </node>
+
   </group>
 
   <group ns = "$(arg robot_namespace_03)">
@@ -87,6 +115,34 @@
 
       <!-- Use the single map server -->
       <remap from="static_map" to="/static_map"/>
+    </node>
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+      <!-- Set planner -->
+      <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+
+      <!-- Default configs form the TB3 repos -->
+      <rosparam file="$(find multi_turtlebot3_environment)/param/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/move_base_params.yaml" command="load" />
+      <rosparam file="$(find multi_turtlebot3_environment)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
+
+      <!-- Set tf_prefix for frames explicity, overwriting defaults -->
+      <!---->
+      <param name="global_costmap/scan/sensor_frame"                value="$(arg robot_namespace_03)/base_scan"/>
+      <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_namespace_03)/base_scan"/>
+      <param name="global_costmap/global_frame"                     value="map"/>
+      <param name="global_costmap/robot_base_frame"                 value="$(arg robot_namespace_03)/base_footprint"/>
+      <param name="local_costmap/scan/sensor_frame"                 value="$(arg robot_namespace_03)/base_scan"/>
+      <param name="local_costmap/obstacle_layer/scan/sensor_frame"  value="$(arg robot_namespace_03)/base_scan"/>
+      <param name="local_costmap/global_frame"                      value="$(arg robot_namespace_03)/odom"/>
+      <param name="local_costmap/robot_base_frame"                  value="$(arg robot_namespace_03)/base_footprint"/>
+      
+      <!-- Centralized map server -->
+      <remap from="map" to="/map"/>
+      <!-- <remap from="move_base_simple/goal" to="/move_base_simple/goal"/> -->
     </node>
 
   </group>
