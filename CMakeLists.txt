@@ -139,7 +139,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/multi_turtlebot3_environment_node.cpp)
 add_executable(simple_navigation_goal src/simple_navigation_goal.cpp)
-add_executable(intermediate_navigator src/intermediate_navigator.cpp)
+add_executable(simulation_navigator src/simulation_navigator.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -156,7 +156,7 @@ add_executable(intermediate_navigator src/intermediate_navigator.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(simple_navigation_goal ${catkin_LIBRARIES})
-target_link_libraries(intermediate_navigator ${catkin_LIBRARIES})
+target_link_libraries(simulation_navigator ${catkin_LIBRARIES})
 
 #############
 ## Install ##

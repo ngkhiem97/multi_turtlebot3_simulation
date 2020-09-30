@@ -14,6 +14,9 @@
     <param name="frame_id"    value="map"/>
   </node>
 
+  <!-- intermediate navigator-->
+  <node pkg="multi_turtlebot3_environment" name="simulation_navigator" type="simulation_navigator" />
+
   <group ns = "$(arg robot_namespace_01)">
 
     <!-- amcl -->
@@ -42,7 +45,6 @@
       <rosparam file="$(find multi_turtlebot3_environment)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
 
       <!-- Set tf_prefix for frames explicity, overwriting defaults -->
-      <!---->
       <param name="global_costmap/scan/sensor_frame"                value="$(arg robot_namespace_01)/base_scan"/>
       <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_namespace_01)/base_scan"/>
       <param name="global_costmap/global_frame"                     value="map"/>
@@ -86,7 +88,6 @@
       <rosparam file="$(find multi_turtlebot3_environment)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
 
       <!-- Set tf_prefix for frames explicity, overwriting defaults -->
-      <!---->
       <param name="global_costmap/scan/sensor_frame"                value="$(arg robot_namespace_02)/base_scan"/>
       <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_namespace_02)/base_scan"/>
       <param name="global_costmap/global_frame"                     value="map"/>
@@ -130,7 +131,6 @@
       <rosparam file="$(find multi_turtlebot3_environment)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
 
       <!-- Set tf_prefix for frames explicity, overwriting defaults -->
-      <!---->
       <param name="global_costmap/scan/sensor_frame"                value="$(arg robot_namespace_03)/base_scan"/>
       <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_namespace_03)/base_scan"/>
       <param name="global_costmap/global_frame"                     value="map"/>
