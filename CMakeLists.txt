@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(multi_turtlebot3_environment)
+project(multi_turtlebot3_simulation)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -137,7 +137,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/multi_turtlebot3_environment_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/multi_turtlebot3_simulation_node.cpp)
 add_executable(simple_navigation_goal src/simple_navigation_goal.cpp)
 add_executable(simulation_navigator src/simulation_navigator.cpp)
 
@@ -205,7 +205,7 @@ target_link_libraries(simulation_navigator ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_multi_turtlebot3_environment.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_multi_turtlebot3_simulation.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
