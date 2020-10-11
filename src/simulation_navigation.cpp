@@ -107,6 +107,7 @@ int main(int argc, char **argv)
   robots.push_back("turtlebot01");
   robots.push_back("turtlebot02");
   robots.push_back("turtlebot03");
+  robots.push_back("turtlebot04");
 
   /**
    * The subscribe() call is how you tell ROS that you want to receive messages

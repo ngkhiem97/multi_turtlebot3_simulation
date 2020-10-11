@@ -8,6 +8,23 @@
   <arg name="robot_namespace_01" default="turtlebot01"/>
   <arg name="robot_namespace_02" default="turtlebot02"/>
   <arg name="robot_namespace_03" default="turtlebot03"/>
+  <arg name="robot_namespace_04" default="turtlebot04"/>
+
+  <!-- Turtlebot 1 -->
+  <arg name="x_pos_01" default="-1.5"/>
+  <arg name="y_pos_01" default="-0.5"/>
+
+  <!-- Turtlebot 2 -->
+  <arg name="x_pos_02" default="-1.5"/>
+  <arg name="y_pos_02" default="0.5"/>
+  
+  <!-- Turtlebot 3 -->
+  <arg name="x_pos_03" default="-0.5"/>
+  <arg name="y_pos_03" default="-0.5"/>
+
+  <!-- Turtlebot 4 -->
+  <arg name="x_pos_04" default="-0.5"/>
+  <arg name="y_pos_04" default="0.5"/>
     
   <!-- map server -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" respawn="false">
@@ -31,8 +48,8 @@
       <param name="transform_tolerance"       value="0.5"/>
       <param name="recovery_alpha_slow"       value="0.00"/>
       <param name="recovery_alpha_fast"       value="0.00"/>
-      <param name="initial_pose_x"            value="-2.0"/>
-      <param name="initial_pose_y"            value="-0.5"/>
+      <param name="initial_pose_x"            value="$(arg x_pos_01)"/>
+      <param name="initial_pose_y"            value="$(arg y_pos_01)"/>
       <param name="gui_publish_rate"          value="50.0"/>
 
       <param name="laser_max_range"           value="3.5"/>
@@ -101,8 +118,8 @@
       <param name="transform_tolerance"       value="0.5"/>
       <param name="recovery_alpha_slow"       value="0.00"/>
       <param name="recovery_alpha_fast"       value="0.00"/>
-      <param name="initial_pose_x"            value="-2.0"/>
-      <param name="initial_pose_y"            value="0.5"/>
+      <param name="initial_pose_x"            value="$(arg x_pos_02)"/>
+      <param name="initial_pose_y"            value="$(arg y_pos_02)"/>
       <param name="gui_publish_rate"          value="50.0"/>
 
       <param name="laser_max_range"           value="3.5"/>
@@ -171,8 +188,8 @@
       <param name="transform_tolerance"       value="0.5"/>
       <param name="recovery_alpha_slow"       value="0.00"/>
       <param name="recovery_alpha_fast"       value="0.00"/>
-      <param name="initial_pose_x"            value="2.0"/>
-      <param name="initial_pose_y"            value="-0.5"/>
+      <param name="initial_pose_x"            value="$(arg x_pos_03)"/>
+      <param name="initial_pose_y"            value="$(arg y_pos_03)"/>
       <param name="gui_publish_rate"          value="50.0"/>
 
       <param name="laser_max_range"           value="3.5"/>
@@ -227,6 +244,76 @@
 
   </group>
 
+
+  <group ns = "$(arg robot_namespace_04)">
+
+    <!-- amcl -->
+    <node pkg="amcl" type="amcl" name="amcl">
+
+      <param name="min_particles"             value="500"/>
+      <param name="max_particles"             value="3000"/>
+      <param name="kld_err"                   value="0.02"/>
+      <param name="update_min_d"              value="0.20"/>
+      <param name="update_min_a"              value="0.20"/>
+      <param name="resample_interval"         value="1"/>
+      <param name="transform_tolerance"       value="0.5"/>
+      <param name="recovery_alpha_slow"       value="0.00"/>
+      <param name="recovery_alpha_fast"       value="0.00"/>
+      <param name="initial_pose_x"            value="$(arg x_pos_04)"/>
+      <param name="initial_pose_y"            value="$(arg y_pos_04)"/>
+      <param name="gui_publish_rate"          value="50.0"/>
+
+      <param name="laser_max_range"           value="3.5"/>
+      <param name="laser_max_beams"           value="180"/>
+      <param name="laser_z_hit"               value="0.5"/>
+      <param name="laser_z_short"             value="0.05"/>
+      <param name="laser_z_max"               value="0.05"/>
+      <param name="laser_z_rand"              value="0.5"/>
+      <param name="laser_sigma_hit"           value="0.2"/>
+      <param name="laser_lambda_short"        value="0.1"/>
+      <param name="laser_likelihood_max_dist" value="2.0"/>
+      <param name="laser_model_type"          value="likelihood_field"/>
+
+      <param name="odom_model_type"           value="diff"/>
+      <param name="odom_alpha1"               value="0.1"/>
+      <param name="odom_alpha2"               value="0.1"/>
+      <param name="odom_alpha3"               value="0.1"/>
+      <param name="odom_alpha4"               value="0.1"/>
+      <param name="odom_frame_id"             value="$(arg robot_namespace_04)/odom"/> 
+      <param name="base_frame_id"             value="$(arg robot_namespace_04)/base_footprint"/>
+
+      <!-- <remap from="initialpose"               to="/initialpose"/> -->
+      <remap from="static_map" to="/static_map"/>
+    </node>
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+      <!-- Set planner -->
+      <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+
+      <!-- Default configs form the TB3 repos -->
+      <rosparam file="$(find multi_turtlebot3_simulation)/param/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find multi_turtlebot3_simulation)/param/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find multi_turtlebot3_simulation)/param/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find multi_turtlebot3_simulation)/param/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find multi_turtlebot3_simulation)/param/move_base_params.yaml" command="load" />
+      <rosparam file="$(find multi_turtlebot3_simulation)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
+
+      <!-- Set tf_prefix for frames explicity, overwriting defaults -->
+      <param name="global_costmap/scan/sensor_frame"                value="$(arg robot_namespace_04)/base_scan"/>
+      <param name="global_costmap/obstacle_layer/scan/sensor_frame" value="$(arg robot_namespace_04)/base_scan"/>
+      <param name="global_costmap/global_frame"                     value="map"/>
+      <param name="global_costmap/robot_base_frame"                 value="$(arg robot_namespace_04)/base_footprint"/>
+      <param name="local_costmap/scan/sensor_frame"                 value="$(arg robot_namespace_04)/base_scan"/>
+      <param name="local_costmap/obstacle_layer/scan/sensor_frame"  value="$(arg robot_namespace_04)/base_scan"/>
+      <param name="local_costmap/global_frame"                      value="$(arg robot_namespace_04)/odom"/>
+      <param name="local_costmap/robot_base_frame"                  value="$(arg robot_namespace_04)/base_footprint"/>
+      
+      <!-- Centralized map server -->
+      <remap from="map" to="/map"/>
+      <!-- <remap from="move_base_simple/goal" to="/move_base_simple/goal"/> -->
+    </node>
+
+  </group>
   <!-- rviz -->
   <group if="$(arg open_rviz)"> 
     <node pkg="rviz" type="rviz" name="rviz" required="true"

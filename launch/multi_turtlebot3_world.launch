@@ -4,21 +4,27 @@
   
   <!-- Turtlebot 1 -->
   <arg name="tb1" default="turtlebot01"/>
-  <arg name="x_pos_01" default="-2.0"/>
+  <arg name="x_pos_01" default="-1.5"/>
   <arg name="y_pos_01" default="-0.5"/>
   <arg name="z_pos_01" default="0.0"/>
 
   <!-- Turtlebot 2 -->
   <arg name="tb2" default="turtlebot02"/>
-  <arg name="x_pos_02" default="-2.0"/>
+  <arg name="x_pos_02" default="-1.5"/>
   <arg name="y_pos_02" default="0.5"/>
   <arg name="z_pos_02" default="0.0"/>
   
   <!-- Turtlebot 3 -->
   <arg name="tb3" default="turtlebot03"/>
-  <arg name="x_pos_03" default="2.0"/>
+  <arg name="x_pos_03" default="-0.5"/>
   <arg name="y_pos_03" default="-0.5"/>
   <arg name="z_pos_03" default="0.0"/>
+
+  <!-- Turtlebot 4 -->
+  <arg name="tb4" default="turtlebot04"/>
+  <arg name="x_pos_04" default="-0.5"/>
+  <arg name="y_pos_04" default="0.5"/>
+  <arg name="z_pos_04" default="0.0"/>
 
   <!-- Launch Gazebo world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -59,6 +65,17 @@
     <param name="tf_prefix" value="$(arg tb3)" />
     
     <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"  args="-urdf -model $(arg tb3) -x $(arg x_pos_03) -y $(arg y_pos_03) -z $(arg z_pos_03) -param /robot_description" />
+    
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+      <param name="publish_frequency" type="double" value="50.0" />
+    </node>
+  </group>
+
+  <!--Spawn robot 4 on Gazebo -->
+  <group ns = "$(arg tb4)">
+    <param name="tf_prefix" value="$(arg tb4)" />
+    
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"  args="-urdf -model $(arg tb4) -x $(arg x_pos_04) -y $(arg y_pos_04) -z $(arg z_pos_04) -param /robot_description" />
     
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
       <param name="publish_frequency" type="double" value="50.0" />
