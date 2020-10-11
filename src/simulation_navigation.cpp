@@ -60,7 +60,6 @@ void executeSeq()
   for (std::multimap<std::string, geometry_msgs::PoseStamped>::iterator it = plan.begin(); it != plan.end(); it++)
   {
     ROS_WARN("For plan: %s",it->first.c_str());
-    // sendGoal(it->first + "/move_base", it->second);
     std::thread thread(sendGoal, it->first + "/move_base", it->second);
     threads.push_back(std::move(thread));
   }
