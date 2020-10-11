@@ -1,67 +1,10 @@
-#include "ros/ros.h"
-#include "geometry_msgs/PoseStamped.h"
-#include "nav_msgs/GetPlan.h"
-#include "nav_msgs/Path.h"
-#include <tf/transform_listener.h>
-#include <math.h>
+#include <ros/ros.h>
+#include <ros/console.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
-
-tf::StampedTransform getTransform(const std::string& target_frame, const std::string& source_frame)
-{
-  ros::NodeHandle n;
-
-  tf::TransformListener listener;
-  tf::StampedTransform transform;
-
-  while (n.ok()){
-    try{
-      listener.lookupTransform(target_frame, source_frame, ros::Time(0), transform);
-    }
-    catch (tf::TransformException ex){
-      ROS_WARN("%s",ex.what());
-      ros::Duration(1.0).sleep();
-      continue;
-    }
-    return transform;
-  }
-}
-
-geometry_msgs::PoseStamped tfToPoseStamped(const tf::StampedTransform& transform)
-{
-  geometry_msgs::PoseStamped poseStamped;
-
-  // Assign header
-  poseStamped.header.frame_id = "map";
-  poseStamped.header.stamp = ros::Time::now();
-
-  // Assign position
-  poseStamped.pose.position.x = transform.getOrigin().x();
-  poseStamped.pose.position.y = transform.getOrigin().y();
-  poseStamped.pose.position.z = transform.getOrigin().z();
-  
-  // Assign orientation
-  poseStamped.pose.orientation.x = transform.getOrigin().x();
-  poseStamped.pose.orientation.y = transform.getOrigin().y();
-  poseStamped.pose.orientation.z = transform.getOrigin().z();
-  poseStamped.pose.orientation.w = transform.getOrigin().w();
-
-  return poseStamped;
-}
-
-double getDistance(const nav_msgs::Path& path)
-{
-  double path_length = 0;
-  for (int i = 0; i < path.poses.size() - 1; i++) {
-    double position_a_x = path.poses[i].pose.position.x;
-    double position_b_x = path.poses[i+1].pose.position.x;
-    double position_a_y = path.poses[i].pose.position.y;
-    double position_b_y = path.poses[i+1].pose.position.y;
-
-    path_length += sqrt(pow((position_b_x - position_a_x), 2) + pow((position_b_y - position_a_y), 2));
-  }
-  return path_length;
-}
+#include <multi_turtlebot3_simulation/simulation_navigator.h>
+#include <multi_turtlebot3_simulation/simulation_task_distributor.h>
 
 void sendGoal(const std::string& actionlib, const geometry_msgs::PoseStamped::ConstPtr& poseStamped)
 {
@@ -94,7 +37,6 @@ void sendGoal(const std::string& actionlib, const geometry_msgs::PoseStamped::Co
     ROS_INFO("Hooray, naviagtion goal send");
   else
     ROS_INFO("Robot failed to move");
-
 }
 
 /**
@@ -104,58 +46,59 @@ void setGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& poseStamped)
 {
   ROS_INFO("I heard a goal!!!");
   ROS_INFO("header.frame_id: [%s]", poseStamped->header.frame_id.c_str());
+  ROS_INFO("header.stamp: [%f]", poseStamped->header.stamp.toSec());
   ROS_INFO("pose.position.x: [%f]", poseStamped->pose.position.x);
   ROS_INFO("pose.position.y: [%f]", poseStamped->pose.position.y);
   ROS_INFO("pose.position.z: [%f]", poseStamped->pose.position.z);
 
-  ros::NodeHandle n;
+  // Get navigation distamce of turtlebot01
+  double d1=0;
+  while (d1 == 0) {
+    ROS_INFO("Get navigation distamce of turtlebot01...");
+    multi_turtlebot3_simulation::SimulationNavigator navigator("turtlebot01", "base_footprint", "map", "move_base/NavfnROS/make_plan");
+    d1 = navigator.getDistance(*poseStamped);
+    ROS_INFO("d1: [%f]", d1);
+  }
 
-  /**
-   * Loop three Turtlebots
-   */ 
-
-  // Get navigation plan of turtlebot01
-  ros::ServiceClient getPlanClient01 = n.serviceClient<nav_msgs::GetPlan>("/turtlebot01/move_base/NavfnROS/make_plan");
-  tf::StampedTransform transform_1 = getTransform("/turtlebot01/odom", "/turtlebot01/base_footprint");
-  nav_msgs::GetPlan getPlan01;
-  getPlan01.request.start     = tfToPoseStamped(transform_1);
-  getPlan01.request.goal      = *poseStamped;
-  getPlan01.request.tolerance = .5;
-  getPlanClient01.call(getPlan01);
-  ROS_INFO("Getting distance for turtlebot01!!!");
-  double d1 = getDistance(getPlan01.response.plan);
-
-  // Get navigation plan of turtlebot02
-  ros::ServiceClient getPlanClient02 = n.serviceClient<nav_msgs::GetPlan>("/turtlebot02/move_base/NavfnROS/make_plan");
-  tf::StampedTransform transform_2 = getTransform("/turtlebot02/odom", "/turtlebot02/base_footprint");
-  nav_msgs::GetPlan getPlan02;
-  getPlan02.request.start     = tfToPoseStamped(transform_2);
-  getPlan02.request.goal      = *poseStamped;
-  getPlan02.request.tolerance = .5;
-  getPlanClient01.call(getPlan02);
-  ROS_INFO("Getting distance for turtlebot02!!!");
-  double d2 = getDistance(getPlan02.response.plan);
+  // Get navigation distamce of turtlebot02
+  double d2=0;
+  while (d2 == 0) {
+    ROS_INFO("Get navigation distamce of turtlebot02..");
+    multi_turtlebot3_simulation::SimulationNavigator navigator("turtlebot02", "base_footprint", "map", "move_base/NavfnROS/make_plan");
+    d2 = navigator.getDistance(*poseStamped);
+    ROS_INFO("d2: [%f]", d2);
+  }
 
   // Get navigation plan of turtlebot03
-  ros::ServiceClient getPlanClient03 = n.serviceClient<nav_msgs::GetPlan>("/turtlebot03/move_base/NavfnROS/make_plan");
-  tf::StampedTransform transform_3 = getTransform("/turtlebot03/odom", "/turtlebot03/base_footprint");
-  nav_msgs::GetPlan getPlan03;
-  getPlan03.request.start     = tfToPoseStamped(transform_3);
-  getPlan03.request.goal      = *poseStamped;
-  getPlan03.request.tolerance = .5;
-  getPlanClient01.call(getPlan03);
-  ROS_INFO("Getting distance for turtlebot03!!!");
-  double d3 = getDistance(getPlan03.response.plan);
+  double d3=0;
+  while (d3 == 0) {
+    ROS_INFO("Get navigation distamce of turtlebot03..");
+    multi_turtlebot3_simulation::SimulationNavigator navigator("turtlebot03", "base_footprint", "map", "move_base/NavfnROS/make_plan");
+    d3 = navigator.getDistance(*poseStamped);
+    ROS_INFO("d3: [%f]", d3);
+  }
 
-  /**
-   * Send goal to shortest distance
-   */ 
+  
+  // Send goal to shortest distance
   if (d1 <= d2 && d1 <= d3) {
     sendGoal("/turtlebot01/move_base", poseStamped);
   } else if (d2 <= d1 && d2 <= d3) {
     sendGoal("/turtlebot02/move_base", poseStamped);
   } else {
     sendGoal("/turtlebot03/move_base", poseStamped);
+  }
+}
+
+std::vector<geometry_msgs::PoseStamped> goals;
+
+void setGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& poseStamped)
+{
+  goals.insert(poseStamped);
+
+  if (goals.size() == 3)
+  {
+    executeSeq();
+    goals = std::vector<geometry_msgs::PoseStamped>(); // reset goals
   }
 }
 
@@ -171,7 +114,7 @@ int main(int argc, char **argv)
    * You must call one of the versions of ros::init() before using any other
    * part of the ROS system.
    */
-  ros::init(argc, argv, "simulation_navigator");
+  ros::init(argc, argv, "simulation_navigation");
 
   /**
    * NodeHandle is the main access point to communications with the ROS system.

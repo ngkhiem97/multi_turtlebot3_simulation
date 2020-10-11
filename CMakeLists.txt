@@ -108,7 +108,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES multi_turtlebot3_environment
+#  LIBRARIES multi_turtlebot3_simulation
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -120,13 +120,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/multi_turtlebot3_environment.cpp
+#   src/${PROJECT_NAME}/multi_turtlebot3_simulation.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -138,8 +138,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/multi_turtlebot3_simulation_node.cpp)
-add_executable(simple_navigation_goal src/simple_navigation_goal.cpp)
-add_executable(simulation_navigator src/simulation_navigator.cpp)
+add_executable(simulation_navigation src/simulation_navigation.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -155,8 +154,7 @@ add_executable(simulation_navigator src/simulation_navigator.cpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(simple_navigation_goal ${catkin_LIBRARIES})
-target_link_libraries(simulation_navigator ${catkin_LIBRARIES})
+target_link_libraries(simulation_navigation ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -187,11 +185,11 @@ target_link_libraries(simulation_navigator ${catkin_LIBRARIES})
 # )
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+#install(DIRECTORY include/${PROJECT_NAME}/
+#  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+#  FILES_MATCHING PATTERN "*.h"
+#  PATTERN ".svn" EXCLUDE
+#)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
