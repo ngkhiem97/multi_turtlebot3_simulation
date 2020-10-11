@@ -15,7 +15,7 @@ class NavigationAlgorithm
 {
 public:
     virtual ~NavigationAlgorithm() {}
-    virtual std::map<std::string, geometry_msgs::PoseStamped> run(const std::vector<std::string> robots, const std::vector<geometry_msgs::PoseStamped> goals) = 0;
+    virtual std::multimap<std::string, geometry_msgs::PoseStamped> run(const std::vector<std::string> robots, const std::vector<geometry_msgs::PoseStamped> goals) = 0;
 };
 
 // Using strategy design pattern
@@ -24,43 +24,57 @@ public:
 class NavigationAlgorithmSimple : public NavigationAlgorithm
 {
 public:
-    std::map<std::string, geometry_msgs::PoseStamped> run(const std::vector<std::string> robots, 
+    std::multimap<std::string, geometry_msgs::PoseStamped> run(std::vector<std::string> robots, 
                                                           const std::vector<geometry_msgs::PoseStamped> goals) override
     {
-        std::map<std::string, geometry_msgs::PoseStamped> results;
+        std::multimap<std::string, geometry_msgs::PoseStamped> results;
 
         int loop_size = robots.size(); // hardcode
-        for (n = 0; n < loop_size; ++n)
+        for (int n = 0; n < loop_size; ++n)
         {
+
             // calculate for the first robot
-            double distance = navigator(*robots.begin(), "base_footprint", "map", "move_base/NavfnROS/make_plan").getDistance(goals.at(n)); 
+            SimulationNavigator navigator(*robots.begin(), "base_footprint", "map", "move_base/NavfnROS/make_plan");
+
+            double distance = 0;
+            while (distance == 0) distance = navigator.getDistance(goals.at(n)); 
             std::string robot = robots.at(0);
 
-            for (std::vector<td::string>::iterator it_robot = robots.begin() + 1 ; it_robot != robots.end(); ++it_robot)
+            ROS_WARN("TaskDistributor run at Goal #%d", n);
+            ROS_WARN("TaskDistributor initialize %s with distance %f", robot.c_str(), distance);
+
+            for (std::vector<std::string>::const_iterator it_robot = robots.begin() + 1; it_robot != robots.end(); ++it_robot)
             {
                 SimulationNavigator navigator(*it_robot, "base_footprint", "map", "move_base/NavfnROS/make_plan");
-                c_distance = navigator.getDistance(goals.at(n));
 
+                double c_distance = 0;
+                while (c_distance == 0) c_distance = navigator.getDistance(goals.at(n));
+                ROS_WARN("TaskDistributor calculate %s with distance %f", (*it_robot).c_str(), c_distance);
                 if (c_distance < distance)
                 {
                     distance = c_distance;
                     robot = *it_robot;
+                    ROS_WARN("TaskDistributor switch to %s with distance %f", robot.c_str(), distance);
                 }
             }
 
-            results[robot] = goals.at(n);
+            results.insert(std::pair<std::string, geometry_msgs::PoseStamped>(robot,goals.at(n)));
+            robots.erase(std::remove(robots.begin(), robots.end(), robot), robots.end()); 
+            ROS_WARN("TaskDistributor assaigned %s with Goal #%d", robot.c_str(), n);
         }
-        return result;
+        return results;
     }
 };
 
 // Strategy 2
 class NavigationAlgorithmExhastive : public NavigationAlgorithm
 {
-    std::map<std::string, geometry_msgs::PoseStamped> run(const std::vector<std::string> robots, 
+    std::multimap<std::string, geometry_msgs::PoseStamped> run(const std::vector<std::string> robots, 
                                                           const std::vector<geometry_msgs::PoseStamped> goals) override
     {
-        return std::map<std::string, geometry_msgs::PoseStamped>();
+        
+
+        return std::multimap<std::string, geometry_msgs::PoseStamped>();
     }
 };
 
@@ -72,18 +86,13 @@ class SimulationTaskDistributor
             this->algorithm = s_algorithm;
         }
 
-        ~SimulationTaskDistributor()
-        {
-            delete this->algorithm;
-        }
-
         void setAlgorithm(NavigationAlgorithm *s_algorithm)
         {
             delete this->algorithm;
             this->algorithm = s_algorithm;
         }
         
-        std::map<std::string, geometry_msgs::PoseStamped> run(const std::vector<std::string> robots, 
+        std::multimap<std::string, geometry_msgs::PoseStamped> run(const std::vector<std::string> robots, 
                                                             const std::vector<geometry_msgs::PoseStamped> goals)
         {
             return this->algorithm->run(robots, goals);

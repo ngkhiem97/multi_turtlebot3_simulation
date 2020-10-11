@@ -5,9 +5,16 @@
 #include <actionlib/client/simple_action_client.h>
 #include <multi_turtlebot3_simulation/simulation_navigator.h>
 #include <multi_turtlebot3_simulation/simulation_task_distributor.h>
+#include <map>
+#include <thread>
 
-void sendGoal(const std::string& actionlib, const geometry_msgs::PoseStamped::ConstPtr& poseStamped)
+// Store the received goals from /move_base_simple/goal topic
+std::vector<geometry_msgs::PoseStamped> goals;
+std::vector<std::string> robots;
+
+void sendGoal(const std::string actionlib, const geometry_msgs::PoseStamped poseStamped)
 {
+  ROS_WARN("Begin sending goal!");
   //tell the action client that we want to spin a thread by default
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac(actionlib, true);
 
@@ -20,13 +27,13 @@ void sendGoal(const std::string& actionlib, const geometry_msgs::PoseStamped::Co
   move_base_goal.target_pose.header.frame_id = "map";
   move_base_goal.target_pose.header.stamp    = ros::Time::now();
 
-  move_base_goal.target_pose.pose.position.x = poseStamped->pose.position.x;
-  move_base_goal.target_pose.pose.position.y = poseStamped->pose.position.y;
-  move_base_goal.target_pose.pose.position.z = poseStamped->pose.position.z;
-  move_base_goal.target_pose.pose.orientation.x = poseStamped->pose.orientation.x;
-  move_base_goal.target_pose.pose.orientation.y = poseStamped->pose.orientation.y;
-  move_base_goal.target_pose.pose.orientation.z = poseStamped->pose.orientation.z;
-  move_base_goal.target_pose.pose.orientation.w = poseStamped->pose.orientation.w;
+  move_base_goal.target_pose.pose.position.x = poseStamped.pose.position.x;
+  move_base_goal.target_pose.pose.position.y = poseStamped.pose.position.y;
+  move_base_goal.target_pose.pose.position.z = poseStamped.pose.position.z;
+  move_base_goal.target_pose.pose.orientation.x = poseStamped.pose.orientation.x;
+  move_base_goal.target_pose.pose.orientation.y = poseStamped.pose.orientation.y;
+  move_base_goal.target_pose.pose.orientation.z = poseStamped.pose.orientation.z;
+  move_base_goal.target_pose.pose.orientation.w = poseStamped.pose.orientation.w;
 
   ROS_INFO("Sending goal");
   ac.sendGoal(move_base_goal);
@@ -39,66 +46,42 @@ void sendGoal(const std::string& actionlib, const geometry_msgs::PoseStamped::Co
     ROS_INFO("Robot failed to move");
 }
 
-/**
- * This tutorial demonstrates simple receipt of messages over the ROS system.
- */
-void setGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& poseStamped)
+// Navigate multiple robots
+void executeSeq()
 {
-  ROS_INFO("I heard a goal!!!");
-  ROS_INFO("header.frame_id: [%s]", poseStamped->header.frame_id.c_str());
-  ROS_INFO("header.stamp: [%f]", poseStamped->header.stamp.toSec());
-  ROS_INFO("pose.position.x: [%f]", poseStamped->pose.position.x);
-  ROS_INFO("pose.position.y: [%f]", poseStamped->pose.position.y);
-  ROS_INFO("pose.position.z: [%f]", poseStamped->pose.position.z);
+  multi_turtlebot3_simulation::NavigationAlgorithmSimple simpleAlgorithm;
+  multi_turtlebot3_simulation::SimulationTaskDistributor distributor(&simpleAlgorithm);
 
-  // Get navigation distamce of turtlebot01
-  double d1=0;
-  while (d1 == 0) {
-    ROS_INFO("Get navigation distamce of turtlebot01...");
-    multi_turtlebot3_simulation::SimulationNavigator navigator("turtlebot01", "base_footprint", "map", "move_base/NavfnROS/make_plan");
-    d1 = navigator.getDistance(*poseStamped);
-    ROS_INFO("d1: [%f]", d1);
+  ROS_INFO("Getting the plan!");
+  std::multimap<std::string, geometry_msgs::PoseStamped> plan = distributor.run(robots, goals);
+  ROS_INFO("Plan size: %d", (int) plan.size());
+
+  std::vector<std::thread> threads;
+  for (std::multimap<std::string, geometry_msgs::PoseStamped>::iterator it = plan.begin(); it != plan.end(); it++)
+  {
+    ROS_WARN("For plan: %s",it->first.c_str());
+    // sendGoal(it->first + "/move_base", it->second);
+    std::thread thread(sendGoal, it->first + "/move_base", it->second);
+    threads.push_back(std::move(thread));
   }
 
-  // Get navigation distamce of turtlebot02
-  double d2=0;
-  while (d2 == 0) {
-    ROS_INFO("Get navigation distamce of turtlebot02..");
-    multi_turtlebot3_simulation::SimulationNavigator navigator("turtlebot02", "base_footprint", "map", "move_base/NavfnROS/make_plan");
-    d2 = navigator.getDistance(*poseStamped);
-    ROS_INFO("d2: [%f]", d2);
-  }
-
-  // Get navigation plan of turtlebot03
-  double d3=0;
-  while (d3 == 0) {
-    ROS_INFO("Get navigation distamce of turtlebot03..");
-    multi_turtlebot3_simulation::SimulationNavigator navigator("turtlebot03", "base_footprint", "map", "move_base/NavfnROS/make_plan");
-    d3 = navigator.getDistance(*poseStamped);
-    ROS_INFO("d3: [%f]", d3);
-  }
-
-  
-  // Send goal to shortest distance
-  if (d1 <= d2 && d1 <= d3) {
-    sendGoal("/turtlebot01/move_base", poseStamped);
-  } else if (d2 <= d1 && d2 <= d3) {
-    sendGoal("/turtlebot02/move_base", poseStamped);
-  } else {
-    sendGoal("/turtlebot03/move_base", poseStamped);
+  for (std::vector<std::thread>::iterator it = threads.begin(); it != threads.end(); ++it)
+  {
+    if (it->joinable()) it->join();
   }
 }
 
-std::vector<geometry_msgs::PoseStamped> goals;
-
 void setGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& poseStamped)
 {
-  goals.insert(poseStamped);
+  goals.push_back(*poseStamped);
 
-  if (goals.size() == 3)
+  if (goals.size() == robots.size())
   {
     executeSeq();
-    goals = std::vector<geometry_msgs::PoseStamped>(); // reset goals
+
+    ROS_WARN("Clearing the buffer!");
+    // Clear the goals buffer
+    goals.clear(); 
   }
 }
 
@@ -122,6 +105,9 @@ int main(int argc, char **argv)
    * NodeHandle destructed will close down the node.
    */
   ros::NodeHandle n;
+  robots.push_back("turtlebot01");
+  robots.push_back("turtlebot02");
+  robots.push_back("turtlebot03");
 
   /**
    * The subscribe() call is how you tell ROS that you want to receive messages
