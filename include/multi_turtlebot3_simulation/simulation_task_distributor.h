@@ -22,6 +22,26 @@ public:
 // Using strategy design pattern
 
 // Strategy 1
+class NavigationAlgorithmRandom : public NavigationAlgorithm
+{
+public:
+    std::multimap<std::string, geometry_msgs::PoseStamped> run(std::vector<std::string> robots, 
+                                                          const std::vector<geometry_msgs::PoseStamped> goals) override
+    {
+        std::multimap<std::string, geometry_msgs::PoseStamped> results;
+        std::random_shuffle(robots.begin(), robots.end());
+
+        int loop_size = robots.size();
+        for (int n = 0; n < loop_size; ++n)
+        {
+            results.insert(std::pair<std::string, geometry_msgs::PoseStamped>(robots.at(n), goals.at(n)));
+            ROS_WARN("TaskDistributor assaigned %s with Goal #%d", robots.at(n).c_str(), n);
+        }
+        return results;
+    }
+};
+
+// Strategy 2
 class NavigationAlgorithmSimple : public NavigationAlgorithm
 {
 public:
@@ -67,7 +87,7 @@ public:
     }
 };
 
-// Strategy 2
+// Strategy 3
 class NavigationAlgorithmExhastive : public NavigationAlgorithm
 {
     std::multimap<std::string, geometry_msgs::PoseStamped> run(std::vector<std::string> robots, 

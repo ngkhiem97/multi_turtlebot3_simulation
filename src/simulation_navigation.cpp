@@ -49,8 +49,8 @@ void sendGoal(const std::string actionlib, const geometry_msgs::PoseStamped pose
 // Navigate multiple robots
 void executeSeq()
 {
-  multi_turtlebot3_simulation::NavigationAlgorithmSimple simpleAlgorithm;
-  multi_turtlebot3_simulation::SimulationTaskDistributor distributor(&simpleAlgorithm);
+  multi_turtlebot3_simulation::NavigationAlgorithmRandom distributingAlgorithm;
+  multi_turtlebot3_simulation::SimulationTaskDistributor distributor(&distributingAlgorithm);
 
   ROS_INFO("Getting the plan!");
   std::multimap<std::string, geometry_msgs::PoseStamped> plan = distributor.run(robots, goals);

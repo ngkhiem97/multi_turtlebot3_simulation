@@ -70,7 +70,7 @@
       <param name="publish_frequency" type="double" value="50.0" />
     </node>
   </group>
-
+  
   <!--Spawn robot 4 on Gazebo -->
   <group ns = "$(arg tb4)">
     <param name="tf_prefix" value="$(arg tb4)" />
